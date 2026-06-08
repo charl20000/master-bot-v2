@@ -3,8 +3,8 @@ const { getTime, drive } = global.utils;
 module.exports = {
 	config: {
 		name: "leave",
-		version: "1.4",
-		author: "NTKhang",
+		version: "2.0",
+		author: "Master Charbel • NEXUS",
 		category: "events"
 	},
 
@@ -19,13 +19,24 @@ module.exports = {
 			defaultLeaveMessage: "{userName} đã {type} khỏi nhóm"
 		},
 		en: {
-			session1: "morning",
-			session2: "noon",
-			session3: "afternoon",
-			session4: "evening",
-			leaveType1: "left",
-			leaveType2: "was kicked from",
-			defaultLeaveMessage: "{userName} {type} the group"
+			session1: "𝐌𝐎𝐑𝐍𝐈𝐍𝐆",
+			session2: "𝐍𝐎𝐎𝐍",
+			session3: "𝐀𝐅𝐓𝐄𝐑𝐍𝐎𝐎𝐍",
+			session4: "𝐄𝐕𝐄𝐍𝐈𝐍𝐆",
+			leaveType1: "𝐥𝐞𝐟𝐭",
+			leaveType2: "𝐰𝐚𝐬 𝐤𝐢𝐜𝐤𝐞𝐝 𝐟𝐫𝐨𝐦",
+			defaultLeaveMessage: `╔══════════════════════════════════════════╗
+║           👋 𝐍𝐄𝐗𝐔𝐒 𝐋𝐄𝐀𝐕𝐄 👋           ║
+╠══════════════════════════════════════════╣
+║                                          ║
+║   📤 {userName}                           ║
+║   🔹 {type} {boxName}                    ║
+║                                          ║
+║   🌤️ 𝗕𝗼𝗻𝗻𝗲 𝗷𝗼𝘂𝗿𝗻é𝗲 𝗲𝘁 𝗮̀ 𝗯𝗶𝗲𝗻𝘁ô𝘁 !      ║
+║                                          ║
+╠══════════════════════════════════════════╣
+║   ⚡ 𝗡𝗘𝗫𝗨𝗦 𝗨𝗟𝗧𝗜𝗠𝗔𝗧𝗘 𝗕𝗢𝗧 ⚡               ║
+╚══════════════════════════════════════════╝`
 		}
 	},
 
@@ -44,14 +55,12 @@ module.exports = {
 				const threadName = threadData.threadName;
 				const userName = await usersData.getName(leftParticipantFbId);
 
-				// {userName}   : name of the user who left the group
-				// {type}       : type of the message (leave)
-				// {boxName}    : name of the box
-				// {threadName} : name of the box
-				// {time}       : time
-				// {session}    : session
-
 				let { leaveMessage = getLang("defaultLeaveMessage") } = threadData.data;
+				
+				// Déterminer le type de départ
+				const isSelfLeave = leftParticipantFbId == event.author;
+				const leaveType = isSelfLeave ? getLang("leaveType1") : getLang("leaveType2");
+				
 				const form = {
 					mentions: leaveMessage.match(/\{userNameTag\}/g) ? [{
 						tag: userName,
@@ -61,7 +70,7 @@ module.exports = {
 
 				leaveMessage = leaveMessage
 					.replace(/\{userName\}|\{userNameTag\}/g, userName)
-					.replace(/\{type\}/g, leftParticipantFbId == event.author ? getLang("leaveType1") : getLang("leaveType2"))
+					.replace(/\{type\}/g, leaveType)
 					.replace(/\{threadName\}|\{boxName\}/g, threadName)
 					.replace(/\{time\}/g, hours)
 					.replace(/\{session\}/g, hours <= 10 ?
