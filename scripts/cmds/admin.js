@@ -13,18 +13,7 @@ module.exports = {
 		},
 		category: "admin",
 		guide: {
-			en: '╔══════════════════════════════════════════╗
-║     👑 𝐀𝐃𝐌𝐈𝐍 𝐂𝐎𝐌𝐌𝐀𝐍𝐃𝐒 👑            ║
-╠══════════════════════════════════════════╣
-║                                          ║
-║  📌 {pn} add <@|id>  → Ajouter admin     ║
-║  📌 {pn} remove <@|id> → Supprimer admin ║
-║  📌 {pn} list        → Liste des admins  ║
-║  📌 {pn} check <@|id> → Vérifier admin   ║
-║                                          ║
-╠══════════════════════════════════════════╣
-║  ⚡ 𝐍𝐄𝐗𝐔𝐒 𝐔𝐋𝐓𝐈𝐌𝐀𝐓𝐄 𝐁𝐎𝐓 ⚡               ║
-╚══════════════════════════════════════════╝'
+			en: "╔══════════════════════════════════════════╗\n║     👑 𝐀𝐃𝐌𝐈𝐍 𝐂𝐎𝐌𝐌𝐀𝐍𝐃𝐒 👑            ║\n╠══════════════════════════════════════════╣\n║                                          ║\n║  📌 {pn} add <@|id>  → Ajouter admin     ║\n║  📌 {pn} remove <@|id> → Supprimer admin ║\n║  📌 {pn} list        → Liste des admins  ║\n║  📌 {pn} check <@|id> → Vérifier admin   ║\n║                                          ║\n╠══════════════════════════════════════════╣\n║  ⚡ 𝐍𝐄𝐗𝐔𝐒 𝐔𝐋𝐓𝐈𝐌𝐀𝐓𝐄 𝐁𝐎𝐓 ⚡               ║\n╚══════════════════════════════════════════╝"
 		}
 	},
 
@@ -44,17 +33,13 @@ module.exports = {
 
 	onStart: async function ({ message, args, usersData, event, getLang }) {
 		const { senderID, mentions, messageReply } = event;
-		const now = new Date();
-		const timeStr = now.toLocaleTimeString('fr-FR');
 		
-		// Afficher le menu si pas de commande
 		if (!args[0]) {
 			const prefix = global.utils.getPrefix(event.threadID);
-			return message.reply(getLang("guide", prefix));
+			return message.reply(getLang("guide"));
 		}
 		
 		switch (args[0].toLowerCase()) {
-			// ========== AJOUTER ADMIN ==========
 			case "add":
 			case "-a": {
 				if (!args[1] && Object.keys(mentions).length === 0 && !messageReply) {
@@ -93,7 +78,6 @@ module.exports = {
 				return message.reply(reply);
 			}
 			
-			// ========== SUPPRIMER ADMIN ==========
 			case "remove":
 			case "-r": {
 				if (!args[1] && Object.keys(mentions).length === 0 && !messageReply) {
@@ -136,7 +120,6 @@ module.exports = {
 				return message.reply(reply);
 			}
 			
-			// ========== LISTE DES ADMINS ==========
 			case "list":
 			case "-l": {
 				if (config.adminBot.length === 0) {
@@ -151,7 +134,6 @@ module.exports = {
 				return message.reply(getLang("listAdmin", getNames.join("\n"), config.adminBot.length));
 			}
 			
-			// ========== VÉRIFIER ADMIN (NOUVEAU) ==========
 			case "check":
 			case "-c": {
 				let targetID = senderID;
