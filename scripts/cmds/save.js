@@ -18,7 +18,7 @@ module.exports = {
 
   onStart: async function ({ message, args, api, event }) {
     // ⚠️ CONFIGURATION GITHUB ⚠️
-    const GITHUB_TOKEN = "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";
+    const GITHUB_TOKEN = "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";
     const REPO_OWNER = "charl20000";
     const REPO_NAME = "master-bot-v2";
     const BRANCH = "main";
