@@ -27,7 +27,7 @@ function saveData(data) {
 
 module.exports = {
   config: {
-    name: "impact",
+    name: "~naruto-storm",
     version: "4.0.0",
     author: "master charbel",
     countDown: 5,
