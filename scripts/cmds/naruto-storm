@@ -1,0 +1,807 @@
+const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
+
+// Chemin de sauvegarde
+const DATA_PATH = path.join(__dirname, "../../data/narutostorm.json");
+
+// Initialisation des données si inexistantes
+function initData() {
+  if (!fs.existsSync(path.dirname(DATA_PATH))) {
+    fs.mkdirSync(path.dirname(DATA_PATH), { recursive: true });
+  }
+  if (!fs.existsSync(DATA_PATH)) {
+    fs.writeFileSync(DATA_PATH, JSON.stringify({ players: {} }, null, 2));
+  }
+}
+
+// Lecture/Sauvegarde des données
+function loadData() {
+  initData();
+  return JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
+}
+
+function saveData(data) {
+  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
+}
+
+module.exports = {
+  config: {
+    name: "narutostorm",
+    version: "3.0.0",
+    author: "Naruto Storm Ultimate",
+    countDown: 5,
+    role: 0,
+    shortDescription: "🍥 Naruto Storm - 50+ Personnages RPG + Combat + Boutique",
+    longDescription: "⚡ Naruto Shippuden Ultimate Ninja Storm avec 50+ personnages :\n- Mode Voix du Maître (RPG)\n- Combat Libre (PvE/PvP)\n- Boutique d'équipement\n- Système de progression sauvegardé",
+    category: "game",
+    guide: "🎮 MENUS :\n{narutostorm} → Menu Principal\n{narutostorm} master → Mode Voix du Maître\n{narutostorm} fight [@joueur] → Combat Libre\n{narutostorm} shop → Boutique\n{narutostorm} profile → Voir ton profil\n{narutostorm} mission → Lancer une mission"
+  },
+
+  onStart: async function ({ message, args, api, event }) {
+    const { threadID, messageID, senderID, mentions } = event;
+    const subCommand = args[0]?.toLowerCase();
+
+    // Chargement des données
+    const allData = loadData();
+    const playerID = senderID;
+    
+    // Initialisation du joueur s'il n'existe pas
+    if (!allData.players[playerID]) {
+      allData.players[playerID] = {
+        name: "Ninja Inconnu",
+        level: 1,
+        xp: 0,
+        xpNeeded: 100,
+        ryo: 500,
+        masterCharacter: null,
+        masterLevel: 1,
+        masterXP: 0,
+        inventory: [],
+        stats: { attack: 10, defense: 10, speed: 10, chakra: 100 },
+        missionsDone: 0,
+        wins: 0,
+        losses: 0,
+        rank: "Académicien"
+      };
+      saveData(allData);
+    }
+
+    const playerData = allData.players[playerID];
+
+    // =============================================
+    // MENU PRINCIPAL
+    // =============================================
+    if (!subCommand || subCommand === "menu") {
+      const mainMenu = `
+╔══════════════════════════════════════╗
+║     🌀 NARUTO STORM ULTIMATE 🌀     ║
+║  🍥 50+ PERSONNAGES ÉDITION 🍥    ║
+╠══════════════════════════════════════╣
+║                                      ║
+║  🎮 **MENU PRINCIPAL**              ║
+║                                      ║
+║  1️⃣  **Voix du Maître** (RPG)       ║
+║     📜 ${playerData.masterCharacter || "Aucun"} | Niv.${playerData.masterLevel}
+║                                      ║
+║  2️⃣  **Combat Libre** (PvE/PvP)     ║
+║     ⚔️ Défie le bot ou un joueur    ║
+║                                      ║
+║  3️⃣  **Boutique** 🏪                ║
+║     💰 ${playerData.ryo} Ryos        ║
+║                                      ║
+║  4️⃣  **Profil** 📊                  ║
+║     ⭐ Niveau ${playerData.level} | ${playerData.rank}
+║                                      ║
+║  5️⃣  **Mission** 📋                 ║
+║     ✅ ${playerData.missionsDone} missions accomplies
+║                                      ║
+║  6️⃣  **Classement** 🏆              ║
+║     Voir le top des joueurs         ║
+║                                      ║
+╠══════════════════════════════════════╣
+║  💡 Commandes rapides :              ║
+║  narutostorm master → RPG           ║
+║  narutostorm fight [@joueur]→ PvP   ║
+║  narutostorm shop → Boutique        ║
+║  narutostorm profile → Profil       ║
+║  narutostorm mission → Mission      ║
+║  narutostorm top → Classement       ║
+╚══════════════════════════════════════╝
+🎙️ *Voix du Maître : "Bienvenue, jeune ninja ! Choisis ta voie !"*
+      `;
+      return api.sendMessage(mainMenu, threadID, messageID);
+    }
+
+    // =============================================
+    // MODE VOIX DU MAÎTRE (RPG)
+    // =============================================
+    if (subCommand === "master") {
+      const characters = getAllCharacters();
+      
+      // Si le joueur n'a pas encore choisi son perso
+      if (!playerData.masterCharacter || args[1] === "choose") {
+        if (args[1] === "choose" && args[2]) {
+          const chosenChar = args.slice(2).join(" ");
+          if (characters[chosenChar]) {
+            playerData.masterCharacter = chosenChar;
+            playerData.masterLevel = 1;
+            playerData.masterXP = 0;
+            playerData.stats = { attack: 15, defense: 15, speed: 15, chakra: 120 };
+            playerData.ryo += 200;
+            saveData(allData);
+            
+            return api.sendMessage(
+              `🎙️ *Voix du Maître : "Excellent choix ! ${chosenChar} sera ton ninja !"*\n\n` +
+              `✅ Tu as choisi **${chosenChar}** ${characters[chosenChar].emoji}\n` +
+              `📍 Village : ${characters[chosenChar].village}\n` +
+              `🏛️ Clan : ${characters[chosenChar].clan}\n` +
+              `⭐ Rareté : ${characters[chosenChar].rarity}\n` +
+              `📊 Stats initiales : Atk:15 | Def:15 | Vit:15 | Chakra:120\n` +
+              `💰 Bonus de départ : +200 Ryos !\n\n` +
+              `⚡ Lance des missions avec : narutostorm mission`,
+              threadID, messageID
+            );
+          } else {
+            return api.sendMessage("❌ Personnage invalide ! Utilise le nom exact.", threadID, messageID);
+          }
+        }
+
+        // Afficher la liste des personnages disponibles par village
+        let charList = "🎙️ *Voix du Maître : 'Choisis ton ninja parmi 50+ personnages !'*\n\n";
+        charList += "📜 **PERSONNAGES DISPONIBLES :**\n\n";
+        
+        // Grouper par village
+        const villages = {};
+        Object.entries(characters).forEach(([name, data]) => {
+          if (!villages[data.village]) villages[data.village] = [];
+          villages[data.village].push({ name, data });
+        });
+
+        Object.entries(villages).forEach(([village, chars]) => {
+          charList += `📍 **${village}** (${chars.length} persos)\n`;
+          chars.forEach(({ name, data }) => {
+            charList += `  ${data.emoji} ${name} [${data.rarity}]\n`;
+          });
+          charList += `\n`;
+        });
+
+        charList += `💡 Pour choisir : narutostorm master choose <nom du perso>\n`;
+        charList += `📋 Exemple : narutostorm master choose Naruto Uzumaki`;
+
+        return api.sendMessage(charList, threadID, messageID);
+      }
+
+      // Afficher le statut du mode Maître
+      const masterChar = characters[playerData.masterCharacter];
+      const masterMenu = `
+╔══════════════════════════════════════╗
+║   🎙️ MODE VOIX DU MAÎTRE 🎙️      ║
+╠══════════════════════════════════════╣
+║                                      ║
+║  👤 ${playerData.masterCharacter} ${masterChar?.emoji || "❓"}
+║  📍 ${masterChar?.village || "Inconnu"}
+║  🏛️ ${masterChar?.clan || "Inconnu"}
+║  ⭐ Niveau Maître : ${playerData.masterLevel}
+║  📊 XP : ${playerData.masterXP}/${playerData.masterLevel * 100}
+║                                      ║
+║  ⚔️ ATK : ${playerData.stats.attack}
+║  🛡️ DEF : ${playerData.stats.defense}
+║  💨 VIT : ${playerData.stats.speed}
+║  🔵 CHAKRA : ${playerData.stats.chakra}
+║                                      ║
+║  💰 Ryos : ${playerData.ryo}
+║  ✅ Missions : ${playerData.missionsDone}
+║  🏆 Rang : ${playerData.rank}
+║                                      ║
+╠══════════════════════════════════════╣
+║  📋 LANCE UNE MISSION :             ║
+║  narutostorm mission                ║
+║  narutostorm mission hard           ║
+║  narutostorm mission legendary      ║
+╚══════════════════════════════════════╝
+🎙️ *"Continue ton entraînement, futur Kage !"*
+      `;
+      return api.sendMessage(masterMenu, threadID, messageID);
+    }
+
+    // =============================================
+    // MISSIONS (RPG)
+    // =============================================
+    if (subCommand === "mission") {
+      if (!playerData.masterCharacter) {
+        return api.sendMessage(
+          "❌ Tu dois d'abord choisir un personnage !\n💡 Utilise : narutostorm master choose <nom>",
+          threadID, messageID
+        );
+      }
+
+      const difficulty = args[1]?.toLowerCase() || "normal";
+      
+      const missions = {
+        easy: [
+          { name: "Entraînement de base", rank: "D", reward: 100, xp: 40, description: "S'entraîner avec des clones" },
+          { name: "Livraison de parchemins", rank: "D", reward: 150, xp: 50, description: "Livrer des parchemins au village voisin" },
+          { name: "Nettoyage de la rivière", rank: "D", reward: 120, xp: 45, description: "Nettoyer la rivière du village" }
+        ],
+        normal: [
+          { name: "Escorte du Daimyo", rank: "C", reward: 300, xp: 100, description: "Protéger un seigneur féodal" },
+          { name: "Pourchasser les bandits", rank: "C", reward: 450, xp: 150, description: "Éliminer des ninjas renégats" },
+          { name: "Protection du convoi", rank: "C", reward: 500, xp: 180, description: "Escorter un convoi de marchandises" }
+        ],
+        hard: [
+          { name: "Protéger le village", rank: "B", reward: 800, xp: 280, description: "Défendre contre une attaque" },
+          { name: "Infiltration ennemie", rank: "B", reward: 1000, xp: 350, description: "Infiltrer une base ennemie" },
+          { name: "Chasse au déserteur", rank: "B", reward: 1200, xp: 400, description: "Capturer un ninja déserteur de rang A" }
+        ],
+        legendary: [
+          { name: "Mission de rang S", rank: "S", reward: 2000, xp: 600, description: "Affronter un membre de l'Akatsuki" },
+          { name: "Protéger le Kage", rank: "S", reward: 3000, xp: 800, description: "Protéger le Hokage d'une menace" },
+          { name: "Guerre ninja", rank: "S", reward: 5000, xp: 1200, description: "Participer à une guerre ninja" }
+        ]
+      };
+
+      const missionPool = missions[difficulty] || missions.normal;
+      const mission = missionPool[Math.floor(Math.random() * missionPool.length)];
+      const successRate = Math.min(90, 20 + (playerData.masterLevel * 8) + (difficulty === "legendary" ? -20 : difficulty === "hard" ? -10 : 0));
+      const success = Math.random() * 100 < successRate;
+
+      if (success) {
+        const bonusXP = Math.floor(Math.random() * 50);
+        const bonusRyos = Math.floor(Math.random() * 200);
+        playerData.ryo += mission.reward + bonusRyos;
+        playerData.masterXP += mission.xp + bonusXP;
+        playerData.missionsDone++;
+        playerData.xp += mission.xp;
+
+        // Level up système
+        while (playerData.masterXP >= playerData.masterLevel * 100) {
+          playerData.masterXP -= playerData.masterLevel * 100;
+          playerData.masterLevel++;
+          playerData.stats.attack += 5;
+          playerData.stats.defense += 5;
+          playerData.stats.speed += 3;
+          playerData.stats.chakra += 20;
+        }
+
+        while (playerData.xp >= playerData.xpNeeded) {
+          playerData.xp -= playerData.xpNeeded;
+          playerData.level++;
+          playerData.xpNeeded = Math.floor(playerData.xpNeeded * 1.5);
+        }
+
+        // Mise à jour du rang
+        updateRank(playerData);
+        saveData(allData);
+
+        return api.sendMessage(
+          `🎙️ *Voix du Maître : "MISSION ACCOMPLIE !"*\n\n` +
+          `📋 **${mission.name}** [Rang ${mission.rank}]\n` +
+          `📝 ${mission.description}\n\n` +
+          `✅ **Succès !** (Probabilité: ${successRate}%)\n` +
+          `💰 +${mission.reward} Ryos (+${bonusRyos} bonus)\n` +
+          `⭐ +${mission.xp + bonusXP} XP (Bonus: ${bonusXP})\n` +
+          `📊 Niveau Maître : ${playerData.masterLevel}\n` +
+          `🏆 Rang : ${playerData.rank}\n` +
+          `⚔️ Stats augmentées !`,
+          threadID, messageID
+        );
+      } else {
+        const penalty = Math.floor(mission.reward * 0.3);
+        playerData.ryo = Math.max(0, playerData.ryo - penalty);
+        
+        // Perte d'XP possible
+        if (Math.random() > 0.7) {
+          playerData.masterXP = Math.max(0, playerData.masterXP - 20);
+        }
+        
+        saveData(allData);
+
+        return api.sendMessage(
+          `🎙️ *Voix du Maître : "MISSION ÉCHOUÉE..."*\n\n` +
+          `📋 **${mission.name}** [Rang ${mission.rank}]\n` +
+          `📝 ${mission.description}\n\n` +
+          `❌ **Échec...** (Probabilité: ${successRate}%)\n` +
+          `💸 -${penalty} Ryos (pénalité)\n` +
+          `💪 Continue de t'entraîner pour réussir !`,
+          threadID, messageID
+        );
+      }
+    }
+
+    // =============================================
+    // COMBAT LIBRE
+    // =============================================
+    if (subCommand === "fight") {
+      const characters = getAllCharacters();
+      const charNames = Object.keys(characters);
+      
+      let fighter1Char, fighter2Char;
+      
+      if (args[1]) {
+        fighter1Char = args.slice(1).join(" ");
+        if (!characters[fighter1Char]) {
+          // Chercher un personnage similaire
+          const similar = charNames.find(name => 
+            name.toLowerCase().includes(args.slice(1).join(" ").toLowerCase())
+          );
+          if (similar) {
+            fighter1Char = similar;
+          } else {
+            return api.sendMessage(
+              "❌ Personnage invalide !\n💡 Utilise un nom exact ou vérifie la liste avec : narutostorm master choose",
+              threadID, messageID
+            );
+          }
+        }
+      } else {
+        // Utiliser le perso maître ou aléatoire
+        fighter1Char = playerData.masterCharacter || charNames[Math.floor(Math.random() * charNames.length)];
+      }
+
+      // Si un joueur est mentionné = PvP
+      if (Object.keys(mentions).length > 0) {
+        const opponentID = Object.keys(mentions)[0];
+        if (!allData.players[opponentID]) {
+          return api.sendMessage("❌ Ce joueur n'a pas encore de profil Naruto Storm !", threadID, messageID);
+        }
+        
+        const opponentData = allData.players[opponentID];
+        fighter2Char = opponentData.masterCharacter || charNames[Math.floor(Math.random() * charNames.length)];
+        
+        // Combat PvP
+        const battleResult = simulateBattle(
+          fighter1Char, characters[fighter1Char],
+          fighter2Char, characters[fighter2Char],
+          playerData.stats,
+          opponentData.stats,
+          true
+        );
+
+        // Mise à jour des stats
+        if (battleResult.winner === "player1") {
+          playerData.wins++;
+          playerData.ryo += 300;
+          playerData.xp += 50;
+        } else {
+          playerData.losses++;
+          opponentData.wins++;
+          opponentData.ryo += 300;
+          opponentData.xp += 50;
+        }
+        saveData(allData);
+
+        return api.sendMessage(
+          `🎙️ *Voix du Maître : "COMBAT PVP !"\n\n` +
+          battleResult.log +
+          `\n👤 ${playerData.name || "Joueur 1"} (Wins: ${playerData.wins}/${playerData.losses})` +
+          `\n👤 ${opponentData.name || "Joueur 2"} (Wins: ${opponentData.wins}/${opponentData.losses})`,
+          threadID, messageID
+        );
+      }
+
+      // Combat PvE (contre le bot)
+      fighter2Char = charNames[Math.floor(Math.random() * charNames.length)];
+      const botStats = {
+        attack: 10 + Math.floor(Math.random() * playerData.level * 2),
+        defense: 10 + Math.floor(Math.random() * playerData.level * 2),
+        speed: 10 + Math.floor(Math.random() * playerData.level * 2),
+        chakra: 100 + Math.floor(Math.random() * playerData.level * 10)
+      };
+
+      const battleResult = simulateBattle(
+        fighter1Char, characters[fighter1Char],
+        fighter2Char, characters[fighter2Char],
+        playerData.stats,
+        botStats,
+        false
+      );
+
+      if (battleResult.winner === "player1") {
+        playerData.wins++;
+        const reward = Math.floor(Math.random() * 200) + 50;
+        playerData.ryo += reward;
+        playerData.xp += 30;
+      } else {
+        playerData.losses++;
+      }
+      updateRank(playerData);
+      saveData(allData);
+
+      return api.sendMessage(
+        `🎙️ *Voix du Maître : "COMBAT !"\n\n` +
+        battleResult.log +
+        `\n👤 ${playerData.name || "Joueur"} (Wins: ${playerData.wins}/${playerData.losses})`,
+        threadID, messageID
+      );
+    }
+
+    // =============================================
+    // BOUTIQUE
+    // =============================================
+    if (subCommand === "shop") {
+      const shopItems = {
+        weapons: {
+          "Kunai Explosif": { price: 200, type: "weapon", attack: 5, emoji: "🔪", description: "Kunai qui explose à l'impact" },
+          "Shuriken Fūma": { price: 500, type: "weapon", attack: 10, emoji: "⭐", description: "Shuriken géant dévastateur" },
+          "Épée de Kusanagi": { price: 1500, type: "weapon", attack: 20, emoji: "🗡️", description: "L'épée légendaire d'Orochimaru" },
+          "Samehada": { price: 3000, type: "weapon", attack: 25, chakra: 30, emoji: "🦈", description: "L'épée dévoreuse de chakra" },
+          "Gunbai d'Uchiha": { price: 2500, type: "weapon", attack: 22, defense: 10, emoji: "🪭", description: "L'éventail de guerre de Madara" }
+        },
+        armor: {
+          "Gilet Ninja": { price: 500, type: "armor", defense: 10, emoji: "🦺", description: "Protection standard de ninja" },
+          "Armure de Samouraï": { price: 1000, type: "armor", defense: 20, emoji: "⚔️", description: "Armure lourde de samouraï" },
+          "Manteau Akatsuki": { price: 2000, type: "armor", defense: 15, chakra: 50, emoji: "☁️", description: "Le manteau légendaire de l'Akatsuki" },
+          "Armure de Raikage": { price: 3500, type: "armor", defense: 30, speed: 10, emoji: "⚡", description: "L'armure de foudre du Raikage" }
+        },
+        consumables: {
+          "Pilule de Chakra": { price: 150, type: "consumable", chakra: 30, emoji: "💊", description: "Restaure du chakra" },
+          "Pilule du Soldat": { price: 300, type: "consumable", attack: 10, chakra: 20, emoji: "💉", description: "Augmente temporairement les capacités" },
+          "Ration Militaire": { price: 200, type: "consumable", defense: 5, chakra: 15, emoji: "🍙", description: "Restaure l'endurance" }
+        },
+        scrolls: {
+          "Parchemin de Jutsu": { price: 1000, type: "scroll", attack: 15, emoji: "📜", description: "Contient un jutsu puissant" },
+          "Parchemin Interdit": { price: 5000, type: "scroll", attack: 30, chakra: 100, emoji: "📕", description: "Technique interdite légendaire" },
+          "Parchemin des Sannin": { price: 3000, type: "scroll", attack: 20, defense: 15, emoji: "🐸🐍💎", description: "Le savoir des trois Sannin" }
+        },
+        rare: {
+          "Boule de Chakra": { price: 2500, type: "rare", allStats: 20, emoji: "🔮", description: "Orbe de chakra pur" },
+          "Bijuu Dormant": { price: 10000, type: "rare", allStats: 50, chakra: 200, emoji: "👹", description: "Fragment de démon à queue" },
+          "Sharingan": { price: 8000, type: "rare", attack: 40, speed: 30, emoji: "👁️", description: "Œil légendaire Uchiha" }
+        }
+      };
+
+      // Achat
+      if (args[1] === "buy" && args[2]) {
+        const searchTerm = args.slice(2).join(" ").toLowerCase();
+        let foundItem = null;
+        let foundCategory = null;
+
+        for (const [category, items] of Object.entries(shopItems)) {
+          for (const [name, item] of Object.entries(items)) {
+            if (name.toLowerCase().includes(searchTerm)) {
+              foundItem = { name, ...item };
+              foundCategory = category;
+              break;
+            }
+          }
+          if (foundItem) break;
+        }
+
+        if (!foundItem) {
+          return api.sendMessage("❌ Article introuvable ! Vérifie le nom.", threadID, messageID);
+        }
+
+        if (playerData.ryo < foundItem.price) {
+          return api.sendMessage(
+            `❌ Pas assez de Ryos !\n💰 Tu as ${playerData.ryo} Ryos, il te faut ${foundItem.price} Ryos.`,
+            threadID, messageID
+          );
+        }
+
+        playerData.ryo -= foundItem.price;
+        playerData.inventory.push(foundItem.name);
+
+        // Appliquer les bonus
+        if (foundItem.attack) playerData.stats.attack += foundItem.attack;
+        if (foundItem.defense) playerData.stats.defense += foundItem.defense;
+        if (foundItem.speed) playerData.stats.speed += foundItem.speed;
+        if (foundItem.chakra) playerData.stats.chakra += foundItem.chakra;
+        if (foundItem.allStats) {
+          playerData.stats.attack += foundItem.allStats;
+          playerData.stats.defense += foundItem.allStats;
+          playerData.stats.speed += foundItem.allStats;
+          playerData.stats.chakra += foundItem.allStats;
+        }
+
+        saveData(allData);
+
+        return api.sendMessage(
+          `🎙️ *Voix du Maître : "Excellent achat !"*\n\n` +
+          `✅ Acheté : ${foundItem.emoji} **${foundItem.name}**\n` +
+          `📝 ${foundItem.description}\n` +
+          `💰 Prix : ${foundItem.price} Ryos\n` +
+          `📊 Stats augmentées !\n` +
+          `💰 Restant : ${playerData.ryo} Ryos\n\n` +
+          `🎒 ${playerData.inventory.length} objets dans l'inventaire`,
+          threadID, messageID
+        );
+      }
+
+      // Afficher la catégorie spécifique
+      if (args[1] && shopItems[args[1]]) {
+        const category = args[1];
+        const items = shopItems[category];
+        
+        let shopDisplay = `
+╔══════════════════════════════════════╗
+║   🏪 BOUTIQUE - ${category.toUpperCase()} 🏪   ║
+╠══════════════════════════════════════╣
+║  💰 Ryos : ${playerData.ryo}                    ║
+╠══════════════════════════════════════╣
+`;
+
+        Object.entries(items).forEach(([name, item]) => {
+          shopDisplay += `║  ${item.emoji} ${name.padEnd(18)} ${item.price}💰 ║\n`;
+        });
+
+        shopDisplay += `
+╠══════════════════════════════════════╣
+║  💡 Acheter :                       ║
+║  narutostorm shop buy <article>     ║
+╚══════════════════════════════════════╝
+🎙️ *"Choisis bien ton équipement !"*
+`;
+        return api.sendMessage(shopDisplay, threadID, messageID);
+      }
+
+      // Affichage de la boutique principale
+      let shopDisplay = `
+╔══════════════════════════════════════╗
+║      🏪 BOUTIQUE NINJA 🏪          ║
+╠══════════════════════════════════════╣
+║  💰 Ryos : ${playerData.ryo}                    ║
+╠══════════════════════════════════════╣
+║  🗡️ ARMES (${Object.keys(shopItems.weapons).length} articles)
+║  🛡️ ARMURES (${Object.keys(shopItems.armor).length} articles)
+║  💊 CONSOMMABLES (${Object.keys(shopItems.consumables).length} articles)
+║  📜 PARCHEMINS (${Object.keys(shopItems.scrolls).length} articles)
+║  🔮 RARES (${Object.keys(shopItems.rare).length} articles)
+╠══════════════════════════════════════╣
+║  💡 Voir une catégorie :            ║
+║  narutostorm shop <catégorie>       ║
+║  narutostorm shop buy <article>     ║
+╚══════════════════════════════════════╝
+🎙️ *"De l'équipement de qualité pour les vrais ninjas !"*
+`;
+
+      return api.sendMessage(shopDisplay, threadID, messageID);
+    }
+
+    // =============================================
+    // PROFIL
+    // =============================================
+    if (subCommand === "profile") {
+      const characters = getAllCharacters();
+      const masterChar = playerData.masterCharacter ? characters[playerData.masterCharacter] : null;
+      
+      const profile = `
+╔══════════════════════════════════════╗
+║        📊 PROFIL NINJA 📊          ║
+╠══════════════════════════════════════╣
+║  👤 ${(playerData.name || "Ninja Inconnu").padEnd(28)}║
+║  ⭐ Niveau Global : ${playerData.level}
+║  📊 XP : ${playerData.xp}/${playerData.xpNeeded}
+║  🏆 Rang : ${playerData.rank}
+║                                      ║
+║  🎙️ **Mode Maître** :              ║
+║  ${masterChar ? `${masterChar.emoji} ${playerData.masterCharacter}`.padEnd(30) : "❌ Aucun".padEnd(30)}║
+║  📍 ${masterChar?.village || "Inconnu"}
+║  🏛️ ${masterChar?.clan || "Inconnu"}
+║  ⭐ Niveau : ${playerData.masterLevel}
+║  📊 XP : ${playerData.masterXP}/${playerData.masterLevel * 100}
+║                                      ║
+║  ⚔️ ATK : ${playerData.stats.attack}
+║  🛡️ DEF : ${playerData.stats.defense}
+║  💨 VIT : ${playerData.stats.speed}
+║  🔵 CHAKRA : ${playerData.stats.chakra}
+║                                      ║
+║  💰 Ryos : ${playerData.ryo}
+║  ✅ Missions : ${playerData.missionsDone}
+║  🏆 Victoires : ${playerData.wins}
+║  💀 Défaites : ${playerData.losses}
+║                                      ║
+║  🎒 Inventaire (${playerData.inventory.length} objets) :
+║  ${playerData.inventory.slice(-5).join(", ") || "Vide".padEnd(28)}║
+╚══════════════════════════════════════╝
+🎙️ *"Voilà ton parcours de ninja ! Continue comme ça !"*
+      `;
+
+      return api.sendMessage(profile, threadID, messageID);
+    }
+
+    // =============================================
+    // CLASSEMENT
+    // =============================================
+    if (subCommand === "top") {
+      const players = Object.entries(allData.players)
+        .sort((a, b) => b[1].level - a[1].level)
+        .slice(0, 10);
+
+      let topDisplay = `
+╔══════════════════════════════════════╗
+║      🏆 CLASSEMENT NINJA 🏆        ║
+╠══════════════════════════════════════╣
+`;
+
+      players.forEach(([id, data], index) => {
+        const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+        const masterChar = data.masterCharacter ? getAllCharacters()[data.masterCharacter] : null;
+        topDisplay += `║  ${medals[index]} ${(data.name || "Ninja").padEnd(12)} Niv.${data.level} ${masterChar?.emoji || "❓"} ║\n`;
+      });
+
+      if (players.length === 0) {
+        topDisplay += `║  Aucun joueur classé...           ║\n`;
+      }
+
+      topDisplay += `
+╚══════════════════════════════════════╝
+🎙️ *"Les meilleurs ninjas du monde !"*
+`;
+      return api.sendMessage(topDisplay, threadID, messageID);
+    }
+
+    // Si aucune commande reconnue
+    return api.sendMessage(
+      "❌ Commande inconnue ! Utilise `narutostorm` pour le menu principal.",
+      threadID, messageID
+    );
+  }
+};
+
+// =============================================
+// FONCTIONS UTILITAIRES
+// =============================================
+
+function getAllCharacters() {
+  return {
+    // KONOHA 11
+    "Naruto Uzumaki": { emoji: "🍥", clan: "Uzumaki", village: "Konoha", rarity: "Légendaire", element: "💨 Vent" },
+    "Sasuke Uchiha": { emoji: "⚡", clan: "Uchiha", village: "Konoha", rarity: "Légendaire", element: "⚡ Foudre" },
+    "Sakura Haruno": { emoji: "🌸", clan: "Haruno", village: "Konoha", rarity: "Rare", element: "🌊 Eau" },
+    "Kakashi Hatake": { emoji: "📖", clan: "Hatake", village: "Konoha", rarity: "Légendaire", element: "⚡ Foudre" },
+    "Rock Lee": { emoji: "💪", clan: "Lee", village: "Konoha", rarity: "Épique", element: "⚡ Taijutsu" },
+    "Neji Hyuga": { emoji: "👁️", clan: "Hyuga", village: "Konoha", rarity: "Épique", element: "💨 Vent" },
+    "Tenten": { emoji: "🎯", clan: "Inconnu", village: "Konoha", rarity: "Commun", element: "⚙️ Armes" },
+    "Shikamaru Nara": { emoji: "🧠", clan: "Nara", village: "Konoha", rarity: "Rare", element: "🌑 Ombre" },
+    "Choji Akimichi": { emoji: "🍖", clan: "Akimichi", village: "Konoha", rarity: "Commun", element: "🔥 Feu" },
+    "Ino Yamanaka": { emoji: "💐", clan: "Yamanaka", village: "Konoha", rarity: "Commun", element: "🧠 Mental" },
+    "Hinata Hyuga": { emoji: "💜", clan: "Hyuga", village: "Konoha", rarity: "Rare", element: "💨 Vent" },
+    "Shino Aburame": { emoji: "🪲", clan: "Aburame", village: "Konoha", rarity: "Rare", element: "🐛 Insectes" },
+    "Kiba Inuzuka": { emoji: "🐺", clan: "Inuzuka", village: "Konoha", rarity: "Commun", element: "🌊 Eau" },
+    
+    // SENSEI
+    "Might Guy": { emoji: "👊", clan: "Guy", village: "Konoha", rarity: "Légendaire", element: "🔥 Feu" },
+    "Asuma Sarutobi": { emoji: "🚬", clan: "Sarutobi", village: "Konoha", rarity: "Épique", element: "💨 Vent" },
+    "Kurenai Yuhi": { emoji: "🌙", clan: "Yuhi", village: "Konoha", rarity: "Rare", element: "🔥 Feu" },
+    "Iruka Umino": { emoji: "🐬", clan: "Umino", village: "Konoha", rarity: "Commun", element: "💨 Vent" },
+    
+    // HOKAGE
+    "Hashirama Senju": { emoji: "🌳", clan: "Senju", village: "Konoha", rarity: "Mythique", element: "🌳 Bois" },
+    "Tobirama Senju": { emoji: "💧", clan: "Senju", village: "Konoha", rarity: "Légendaire", element: "🌊 Eau" },
+    "Hiruzen Sarutobi": { emoji: "👴", clan: "Sarutobi", village: "Konoha", rarity: "Légendaire", element: "🔥 Feu" },
+    "Minato Namikaze": { emoji: "💛", clan: "Namikaze", village: "Konoha", rarity: "Mythique", element: "💨 Vent" },
+    "Tsunade": { emoji: "💎", clan: "Senju", village: "Konoha", rarity: "Légendaire", element: "🔥 Feu" },
+    "Kakashi Hatake (Hokage)": { emoji: "📖", clan: "Hatake", village: "Konoha", rarity: "Légendaire", element: "⚡ Foudre" },
+    "Naruto Uzumaki (Hokage)": { emoji: "🍥", clan: "Uzumaki", village: "Konoha", rarity: "Mythique", element: "💨 Vent" },
+    
+    // UCHIHA
+    "Itachi Uchiha": { emoji: "🌑", clan: "Uchiha", village: "Konoha", rarity: "Mythique", element: "🔥 Feu" },
+    "Madara Uchiha": { emoji: "🔥", clan: "Uchiha", village: "Konoha", rarity: "Mythique", element: "🔥 Feu" },
+    "Obito Uchiha": { emoji: "🌀", clan: "Uchiha", village: "Konoha", rarity: "Mythique", element: "🔥 Feu" },
+    "Shisui Uchiha": { emoji: "💨", clan: "Uchiha", village: "Konoha", rarity: "Légendaire", element: "⚡ Foudre" },
+    "Izuna Uchiha": { emoji: "👁️", clan: "Uchiha", village: "Konoha", rarity: "Épique", element: "🔥 Feu" },
+    "Fugaku Uchiha": { emoji: "👁️", clan: "Uchiha", village: "Konoha", rarity: "Épique", element: "🔥 Feu" },
+    
+    // AKATSUKI
+    "Pain (Nagato)": { emoji: "👁️", clan: "Uzumaki", village: "Ame", rarity: "Mythique", element: "🌊 Eau" },
+    "Konan": { emoji: "📄", clan: "Ame", village: "Ame", rarity: "Épique", element: "💨 Vent" },
+    "Kisame Hoshigaki": { emoji: "🦈", clan: "Hoshigaki", village: "Kiri", rarity: "Épique", element: "🌊 Eau" },
+    "Deidara": { emoji: "💣", clan: "Iwa", village: "Iwa", rarity: "Épique", element: "💥 Explosion" },
+    "Sasori": { emoji: "🦂", clan: "Suna", village: "Suna", rarity: "Légendaire", element: "⚙️ Métal" },
+    "Hidan": { emoji: "💀", clan: "Yugakure", village: "Yu", rarity: "Rare", element: "🩸 Sang" },
+    "Kakuzu": { emoji: "💰", clan: "Takigakure", village: "Taki", rarity: "Épique", element: "🌪️ Tous" },
+    "Zetsu": { emoji: "🌿", clan: "Akatsuki", village: "Inconnu", rarity: "Rare", element: "🌳 Bois" },
+    
+    // KAGE
+    "Gaara": { emoji: "🏜️", clan: "Kazekage", village: "Suna", rarity: "Légendaire", element: "💨 Vent" },
+    "Mei Terumi": { emoji: "💋", clan: "Terumi", village: "Kiri", rarity: "Épique", element: "🌋 Lave" },
+    "Onoki": { emoji: "👴", clan: "Kamizuru", village: "Iwa", rarity: "Légendaire", element: "⛰️ Terre" },
+    "A (4ème Raikage)": { emoji: "⚡", clan: "Raikage", village: "Kumo", rarity: "Légendaire", element: "⚡ Foudre" },
+    "Yagura": { emoji: "🐢", clan: "Kiri", village: "Kiri", rarity: "Épique", element: "🌊 Eau" },
+    
+    // SANNIN
+    "Jiraiya": { emoji: "🐸", clan: "Sannin", village: "Konoha", rarity: "Légendaire", element: "💨 Vent" },
+    "Orochimaru": { emoji: "🐍", clan: "Sannin", village: "Konoha", rarity: "Mythique", element: "🐍 Serpent" },
+    "Tsunade (Sannin)": { emoji: "💎", clan: "Senju", village: "Konoha", rarity: "Légendaire", element: "🔥 Feu" },
+    
+    // JINCHURIKI
+    "Killer Bee": { emoji: "🐙", clan: "Kumo", village: "Kumo", rarity: "Légendaire", element: "⚡ Foudre" },
+    "Yugito Nii": { emoji: "🐱", clan: "Kumo", village: "Kumo", rarity: "Épique", element: "🔥 Feu" },
+    "Roshi": { emoji: "🦍", clan: "Iwa", village: "Iwa", rarity: "Épique", element: "🌋 Lave" },
+    "Han": { emoji: "🐴", clan: "Iwa", village: "Iwa", rarity: "Épique", element: "💨 Vapeur" },
+    "Utakata": { emoji: "🫧", clan: "Kiri", village: "Kiri", rarity: "Épique", element: "🫧 Bulles" },
+    "Fu": { emoji: "🪰", clan: "Taki", village: "Taki", rarity: "Épique", element: "💨 Vent" },
+    
+    // LÉGENDAIRES
+    "Kushina Uzumaki": { emoji: "❤️", clan: "Uzumaki", village: "Konoha", rarity: "Légendaire", element: "⛓️ Scellement" },
+    "Kabuto Yakushi": { emoji: "🧪", clan: "Yakushi", village: "Konoha", rarity: "Épique", element: "🐍 Serpent" },
+    "Danzo Shimura": { emoji: "🦾", clan: "Shimura", village: "Konoha", rarity: "Épique", element: "💨 Vent" },
+    "Might Dai": { emoji: "🔥", clan: "Dai", village: "Konoha", rarity: "Rare", element: "🔥 Feu" },
+    "Sakumo Hatake": { emoji: "⚪", clan: "Hatake", village: "Konoha", rarity: "Légendaire", element: "⚡ Foudre" },
+    "Hagoromo Otsutsuki": { emoji: "👁️", clan: "Otsutsuki", village: "Céleste", rarity: "Mythique", element: "✨ Tout" },
+    "Hamura Otsutsuki": { emoji: "🌙", clan: "Otsutsuki", village: "Lune", rarity: "Mythique", element: "✨ Tout" },
+    "Kaguya Otsutsuki": { emoji: "👁️", clan: "Otsutsuki", village: "Céleste", rarity: "Mythique", element: "✨ Tout" },
+    "Momoshiki Otsutsuki": { emoji: "🌀", clan: "Otsutsuki", village: "Céleste", rarity: "Mythique", element: "✨ Tout" },
+    "Isshiki Otsutsuki": { emoji: "🕳️", clan: "Otsutsuki", village: "Céleste", rarity: "Mythique", element: "✨ Tout" }
+  };
+}
+
+function simulateBattle(char1Name, char1Data, char2Name, char2Data, stats1, stats2, isPvP) {
+  let p1HP = 100 + (stats1.defense || 0);
+  let p2HP = 100 + (stats2.defense || 0);
+  const maxHP1 = p1HP;
+  const maxHP2 = p2HP;
+  
+  let log = "";
+  
+  log += `⚔️ **${char1Name}** ${char1Data.emoji} [${char1Data.village}]\n`;
+  log += `⚔️ **${char2Name}** ${char2Data.emoji} [${char2Data.village}]\n\n`;
+  
+  // Tour 1 - Engagement
+  log += `🎙️ *"ROUND 1... FIGHT !"*\n`;
+  const dmg1_1 = Math.floor(Math.random() * 15) + 5 + Math.floor(stats1.attack / 10);
+  const dmg2_1 = Math.floor(Math.random() * 10) + 5 + Math.floor(stats2.attack / 10);
+  p2HP -= dmg1_1;
+  p1HP -= dmg2_1;
+  log += `💥 Échange de coups ! (-${dmg1_1}/-${dmg2_1})\n`;
+  log += `📊 ${char1Name}: ${Math.round(p1HP/maxHP1*100)}% | ${char2Name}: ${Math.round(p2HP/maxHP2*100)}%\n\n`;
+  
+  // Tour 2 - Jutsu
+  log += `🎙️ *"JUTSU !"*\n`;
+  const dmg1_2 = Math.floor(Math.random() * 20) + 10 + Math.floor(stats1.attack / 5);
+  const dmg2_2 = Math.floor(Math.random() * 15) + 10 + Math.floor(stats2.attack / 5);
+  p2HP -= dmg1_2;
+  p1HP -= dmg2_2;
+  log += `🌀 Techniques spéciales ! (-${dmg1_2}/-${dmg2_2})\n`;
+  log += `📊 ${char1Name}: ${Math.round(Math.max(0, p1HP)/maxHP1*100)}% | ${char2Name}: ${Math.round(Math.max(0, p2HP)/maxHP2*100)}%\n\n`;
+  
+  // Tour 3 - Éveil
+  log += `🎙️ *"AWAKENING !"*\n`;
+  const dmg1_3 = Math.floor(Math.random() * 25) + 15 + Math.floor(stats1.attack / 3);
+  const dmg2_3 = Math.floor(Math.random() * 20) + 10 + Math.floor(stats2.attack / 3);
+  p2HP -= dmg1_3;
+  p1HP -= dmg2_3;
+  log += `⚡ Modes éveil activés ! (-${dmg1_3}/-${dmg2_3})\n`;
+  log += `📊 ${char1Name}: ${Math.round(Math.max(0, p1HP)/maxHP1*100)}% | ${char2Name}: ${Math.round(Math.max(0, p2HP)/maxHP2*100)}%\n\n`;
+  
+  // Tour 4 - Ultime
+  log += `🎙️ *"ULTIMATE JUTSU !"*\n`;
+  const dmg1_4 = Math.floor(Math.random() * 30) + 20 + Math.floor(stats1.attack / 2);
+  const dmg2_4 = Math.floor(Math.random() * 25) + 15 + Math.floor(stats2.attack / 2);
+  p2HP -= dmg1_4;
+  p1HP -= dmg2_4;
+  log += `💥 Techniques ultimes ! (-${dmg1_4}/-${dmg2_4})\n\n`;
+  
+  p1HP = Math.max(0, p1HP);
+  p2HP = Math.max(0, p2HP);
+  
+  log += `╔══════════════════════════════╗\n`;
+  log += `║     📊 RÉSULTAT FINAL 📊    ║\n`;
+  log += `╠══════════════════════════════╣\n`;
+  log += `║  ${char1Name.padEnd(18)} ${Math.round(p1HP/maxHP1*100)}% ║\n`;
+  log += `║  ${char2Name.padEnd(18)} ${Math.round(p2HP/maxHP2*100)}% ║\n`;
+  log += `╚══════════════════════════════╝\n\n`;
+  
+  const winner = p1HP > p2HP ? "player1" : "player2";
+  
+  if (winner === "player1") {
+    log += `🎙️ *"YOU WIN !"*\n`;
+    log += `🏆 Vainqueur : **${char1Name}** ${char1Data.emoji}\n`;
+  } else {
+    log += `🎙️ *"K.O. !"*\n`;
+    log += `🏆 Vainqueur : **${char2Name}** ${char2Data.emoji}\n`;
+  }
+  
+  return { winner, log };
+}
+
+function updateRank(playerData) {
+  if (playerData.level >= 50) playerData.rank = "Kage Légendaire";
+  else if (playerData.level >= 40) playerData.rank = "Hokage";
+  else if (playerData.level >= 30) playerData.rank = "Jōnin d'élite";
+  else if (playerData.level >= 20) playerData.rank = "Jōnin";
+  else if (playerData.level >= 10) playerData.rank = "Chūnin";
+  else if (playerData.level >= 5) playerData.rank = "Genin";
+  else playerData.rank = "Académicien";
+}
