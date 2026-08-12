@@ -1,5 +1,5 @@
 const characters = [
-  // ─── PERSONNAGES JUJUTSU KAISEN ───
+  // ─── PERSONNAGES PRINCIPAUX ───
   {
     name: "Yuji Itadori",
     power: 75,
@@ -269,10 +269,322 @@ const characters = [
     domain: "Sanctuaire Malveillant",
     cursedEnergy: 220,
     type: "maudit"
+  },
+
+  // ─── NOUVEAUX PERSONNAGES ───
+  {
+    name: "Yuji (Éveil)",
+    power: 85,
+    basic: "Coup Divin ⚡",
+    special: "Black Flash Parfait 💥",
+    ultimate: "Domaine : Destruction Totale 💀",
+    domain: "Destruction Totale",
+    cursedEnergy: 130,
+    type: "physique"
+  },
+  {
+    name: "Megumi (Éveil)",
+    power: 80,
+    basic: "Ombre Totale 🌀",
+    special: "Chimère Jardin 🌿",
+    ultimate: "Domaine : Ombre Éternelle 🌌",
+    domain: "Ombre Éternelle",
+    cursedEnergy: 120,
+    type: "technique"
+  },
+  {
+    name: "Hana Kurusu",
+    power: 72,
+    basic: "Lumière ✨",
+    special: "Angel 🕊️",
+    ultimate: "Domaine : Clairière Céleste 🌅",
+    domain: "Clairière Céleste",
+    cursedEnergy: 90,
+    type: "spécial"
+  },
+  {
+    name: "Takaba Fumihiko",
+    power: 70,
+    basic: "Blague 🃏",
+    special: "Rire 😂",
+    ultimate: "Domaine : Comédie Infernale 🎭",
+    domain: "Comédie Infernale",
+    cursedEnergy: 85,
+    type: "spécial"
+  },
+  {
+    name: "Yuki (Éveil)",
+    power: 90,
+    basic: "Star Rage Max 🌟",
+    special: "Big Bang 💥",
+    ultimate: "Domaine : Destruction Stellaire 🌌",
+    domain: "Destruction Stellaire",
+    cursedEnergy: 150,
+    type: "spécial"
+  },
+  {
+    name: "Kashimo (Éveil)",
+    power: 88,
+    basic: "Foudre Divine ⚡",
+    special: "Éclair Absolu 🌩️",
+    ultimate: "Domaine : Tonnerre Infini ⚡",
+    domain: "Tonnerre Infini",
+    cursedEnergy: 140,
+    type: "physique"
+  },
+  {
+    name: "Choso (Éveil)",
+    power: 82,
+    basic: "Sang Royal 🩸",
+    special: "Rivière de Sang 🌊",
+    ultimate: "Domaine : Mer de Sang 🌊🩸",
+    domain: "Mer de Sang",
+    cursedEnergy: 120,
+    type: "maudit"
+  },
+  {
+    name: "Mahito (Éveil)",
+    power: 86,
+    basic: "Transformation Parfaite 🧠",
+    special: "Désespoir Infini 😈",
+    ultimate: "Domaine : Abysse Maudit 🌌",
+    domain: "Abysse Maudit",
+    cursedEnergy: 140,
+    type: "maudit"
+  },
+  {
+    name: "Jogo (Éveil)",
+    power: 84,
+    basic: "Lave Inferno 🌋",
+    special: "Brasier Éternel 🔥",
+    ultimate: "Domaine : Fournaise 🌋🔥",
+    domain: "Fournaise",
+    cursedEnergy: 130,
+    type: "maudit"
+  },
+  {
+    name: "Hanami (Éveil)",
+    power: 80,
+    basic: "Forêt Maudite 🌳",
+    special: "Nature Sauvage 🌿",
+    ultimate: "Domaine : Jungle Maudite 🌍",
+    domain: "Jungle Maudite",
+    cursedEnergy: 120,
+    type: "maudit"
+  },
+  {
+    name: "Dagon (Éveil)",
+    power: 78,
+    basic: "Abysse Profond 🌊",
+    special: "Océan Maudit 🐟",
+    ultimate: "Domaine : Mer des Ténèbres 🌊",
+    domain: "Mer des Ténèbres",
+    cursedEnergy: 115,
+    type: "maudit"
+  },
+  {
+    name: "Toji (Éveil)",
+    power: 90,
+    basic: "Chaîne Mortelle ⛓️",
+    special: "Lame Céleste 🗡️",
+    ultimate: "Assassinat Ultime 🎯",
+    domain: "Chasseur",
+    cursedEnergy: 0,
+    type: "physique"
+  },
+  {
+    name: "Maki (Éveil)",
+    power: 85,
+    basic: "Lame Démoniaque 🗡️",
+    special: "Force Brutale 💪",
+    ultimate: "Domaine : Guerrière Totale ⚔️",
+    domain: "Guerrière Totale",
+    cursedEnergy: 50,
+    type: "physique"
+  },
+  {
+    name: "Panda (Éveil)",
+    power: 75,
+    basic: "Gorille Géant 🦍",
+    special: "Triceratops Furieux 🦕",
+    ultimate: "Domaine : Bête Légendaire 🐻",
+    domain: "Bête Légendaire",
+    cursedEnergy: 90,
+    type: "physique"
+  },
+  {
+    name: "Toge (Éveil)",
+    power: 78,
+    basic: "Parole Divine 🗣️",
+    special: "Ordre Absolu ✨",
+    ultimate: "Domaine : Silence Céleste 🤫",
+    domain: "Silence Céleste",
+    cursedEnergy: 110,
+    type: "spécial"
+  },
+  {
+    name: "Naoya (Éveil)",
+    power: 82,
+    basic: "Vitesse Infinie 🏃",
+    special: "Frame Mortelle 💨",
+    ultimate: "Domaine : Temps Absolu ⚡",
+    domain: "Temps Absolu",
+    cursedEnergy: 110,
+    type: "physique"
+  },
+  {
+    name: "Mei Mei (Éveil)",
+    power: 78,
+    basic: "Corbeau Maudit 🐦",
+    special: "Nuée Noire 🐦🐦",
+    ultimate: "Domaine : Vol de la Mort 💀",
+    domain: "Vol de la Mort",
+    cursedEnergy: 100,
+    type: "physique"
+  },
+  {
+    name: "Utahime (Éveil)",
+    power: 70,
+    basic: "Danse Sacrée 💃",
+    special: "Chant Divin 🎤",
+    ultimate: "Domaine : Symphonie Céleste 🎶",
+    domain: "Symphonie Céleste",
+    cursedEnergy: 95,
+    type: "spécial"
+  },
+  {
+    name: "Angel (Hana)",
+    power: 85,
+    basic: "Lumière Divine ✨",
+    special: "Ailes Sacrées 🕊️",
+    ultimate: "Domaine : Paradis 🌅",
+    domain: "Paradis",
+    cursedEnergy: 130,
+    type: "spécial"
+  },
+  {
+    name: "Uraume",
+    power: 78,
+    basic: "Glace Éternelle ❄️",
+    special: "Tempête Gelée 🌨️",
+    ultimate: "Domaine : Hiver Éternel ❄️",
+    domain: "Hiver Éternel",
+    cursedEnergy: 110,
+    type: "maudit"
+  },
+  {
+    name: "Kenjaku (Éveil)",
+    power: 95,
+    basic: "Corps Parfait 🧬",
+    special: "Barrière Maudite Ultime 🕸️",
+    ultimate: "Domaine : Mille Âmes 🎭",
+    domain: "Mille Âmes",
+    cursedEnergy: 180,
+    type: "maudit"
+  },
+  {
+    name: "Geto (Éveil)",
+    power: 90,
+    basic: "Absorption Totale 🌀",
+    special: "Esprit Suprême 🌑",
+    ultimate: "Domaine : Roi des Démons 👑",
+    domain: "Roi des Démons",
+    cursedEnergy: 160,
+    type: "maudit"
+  },
+  {
+    name: "Sukuna (Heian)",
+    power: 105,
+    basic: "Malveillance Primale 👹",
+    special: "Découpage Absolu 🔪",
+    ultimate: "Domaine : Sanctuaire Éternel ⛩️",
+    domain: "Sanctuaire Éternel",
+    cursedEnergy: 250,
+    type: "maudit"
+  },
+  {
+    name: "Gojo (Rouge)",
+    power: 110,
+    basic: "Rouge Absolu 🔴",
+    special: "Bleu Infini 💠",
+    ultimate: "Domaine : Illimitée Suprême 🌌",
+    domain: "Illimitée Suprême",
+    cursedEnergy: 250,
+    type: "spécial"
+  },
+  {
+    name: "Yuji (Sukuna)",
+    power: 100,
+    basic: "Double Possession 👹",
+    special: "Malveillance Partagée 🔪",
+    ultimate: "Domaine : Sanctuaire Double ⛩️",
+    domain: "Sanctuaire Double",
+    cursedEnergy: 200,
+    type: "maudit"
+  },
+  {
+    name: "Miwa Kasumi",
+    power: 55,
+    basic: "Katana 🗡️",
+    special: "Danse de l'Épée 💃",
+    ultimate: "Domaine : Lame Sacrée ⚔️",
+    domain: "Lame Sacrée",
+    cursedEnergy: 60,
+    type: "physique"
+  },
+  {
+    name: "Kamo Noritoshi",
+    power: 65,
+    basic: "Sang Maudit 🩸",
+    special: "Flèche de Sang 🏹",
+    ultimate: "Domaine : Rivière Sanglante 🩸",
+    domain: "Rivière Sanglante",
+    cursedEnergy: 80,
+    type: "maudit"
+  },
+  {
+    name: "Momo Nishimiya",
+    power: 50,
+    basic: "Balai 🧹",
+    special: "Vent Tranchant 🌪️",
+    ultimate: "Domaine : Tempête Aérienne 🌪️",
+    domain: "Tempête Aérienne",
+    cursedEnergy: 55,
+    type: "physique"
+  },
+  {
+    name: "Nobara (Résurrection)",
+    power: 88,
+    basic: "Clou Sacré 📌",
+    special: "Marteau Divin 🔨",
+    ultimate: "Domaine : Frappe Céleste Parfaite 🌟",
+    domain: "Frappe Céleste Parfaite",
+    cursedEnergy: 130,
+    type: "physique"
+  },
+  {
+    name: "Megumi (Shadow)",
+    power: 92,
+    basic: "Ombre Suprême 🌀",
+    special: "Chimère Parfaite 🌿",
+    ultimate: "Domaine : Royaume des Ombres 🌌",
+    domain: "Royaume des Ombres",
+    cursedEnergy: 150,
+    type: "technique"
+  },
+  {
+    name: "Takaba (Éveil)",
+    power: 80,
+    basic: "Blague Divine 🃏",
+    special: "Rire Cosmique 😂",
+    ultimate: "Domaine : Comédie Divine 🎭",
+    domain: "Comédie Divine",
+    cursedEnergy: 120,
+    type: "spécial"
   }
 ];
 
-// ─── SYSTÈME DE COMBAT AMÉLIORÉ ───
+// ─── SYSTÈME DE COMBAT ───
 const damageSystem = {
   basic: { min: 10, max: 18, chakraCost: 0 },
   special: { min: 20, max: 32, chakraCost: 25 },
@@ -282,7 +594,6 @@ const damageSystem = {
   blackFlash: { multiplier: 2.5, chance: 0.1 }
 };
 
-// ─── SYSTÈME DE DOMAINE ───
 const domainEffects = {
   "Démolition": { boost: 1.3, effect: "dégâts augmentés" },
   "Illimitée": { boost: 1.5, effect: "défense infinie" },
@@ -292,7 +603,37 @@ const domainEffects = {
   "Salle de Jeux": { boost: 1.4, effect: "chance augmentée" },
   "Désespoir Infini": { boost: 1.5, effect: "confusion" },
   "Tonnerre Divin": { boost: 1.3, effect: "paralysie" },
-  "Big Bang": { boost: 1.8, effect: "destruction" }
+  "Big Bang": { boost: 1.8, effect: "destruction" },
+  "Destruction Totale": { boost: 1.7, effect: "destruction massive" },
+  "Ombre Éternelle": { boost: 1.4, effect: "ombre absorbante" },
+  "Clairière Céleste": { boost: 1.3, effect: "guérison" },
+  "Comédie Infernale": { boost: 1.5, effect: "confusion" },
+  "Destruction Stellaire": { boost: 2.0, effect: "destruction cosmique" },
+  "Tonnerre Infini": { boost: 1.6, effect: "paralysie totale" },
+  "Mer de Sang": { boost: 1.4, effect: "saignement" },
+  "Abysse Maudit": { boost: 1.6, effect: "absorption" },
+  "Fournaise": { boost: 1.5, effect: "brûlure" },
+  "Jungle Maudite": { boost: 1.4, effect: "empoisonnement" },
+  "Mer des Ténèbres": { boost: 1.3, effect: "noyade" },
+  "Guerrière Totale": { boost: 1.6, effect: "force brute" },
+  "Bête Légendaire": { boost: 1.4, effect: "force animale" },
+  "Silence Céleste": { boost: 1.5, effect: "silence" },
+  "Temps Absolu": { boost: 1.6, effect: "vitesse" },
+  "Vol de la Mort": { boost: 1.4, effect: "mort" },
+  "Symphonie Céleste": { boost: 1.3, effect: "harmonie" },
+  "Paradis": { boost: 1.5, effect: "guérison divine" },
+  "Hiver Éternel": { boost: 1.4, effect: "gel" },
+  "Mille Âmes": { boost: 1.7, effect: "possession" },
+  "Roi des Démons": { boost: 1.8, effect: "domination" },
+  "Sanctuaire Éternel": { boost: 2.2, effect: "destruction absolue" },
+  "Illimitée Suprême": { boost: 2.5, effect: "omnipotence" },
+  "Sanctuaire Double": { boost: 2.0, effect: "double destruction" },
+  "Lame Sacrée": { boost: 1.3, effect: "tranchant" },
+  "Rivière Sanglante": { boost: 1.4, effect: "saignement" },
+  "Tempête Aérienne": { boost: 1.3, effect: "vent" },
+  "Frappe Céleste Parfaite": { boost: 1.7, effect: "frappe divine" },
+  "Royaume des Ombres": { boost: 1.6, effect: "ombre éternelle" },
+  "Comédie Divine": { boost: 1.5, effect: "rire cosmique" }
 };
 
 // ─── STYLE ───
@@ -319,13 +660,12 @@ const gameState = {};
 module.exports = {
   config: { 
     name: "jujutsu", 
-    version: "5.0",
+    version: "6.0",
     author: "Master Charbel",
     role: 0,
     category: "game",
     shortDescription: "👹 Jujutsu Kaisen - Combat Ultime",
-    longDescription: "Jeu de combat Jujutsu Kaisen avec domaine et énergie maudite",
-    guide: "{p}jujutsu"
+    longDescription: "Jeu de combat Jujutsu Kaisen avec domaine et énergie maudite - 58 personnages"
   },
 
   onStart: async function ({ message, event }) {
@@ -356,9 +696,9 @@ module.exports = {
         `⚔️ ${bold('MODE COMBAT')}\n` +
         `🔥 ${bold('ENERGIE MAUDITE')} : Système avancé\n` +
         `🌌 ${bold('DOMAINE')} : Expansion disponible\n` +
-        `💥 ${bold('BLACK FLASH')} : Chance de déchaînement\n\n` +
-        `📌 ${bold('ENVOYEZ "start" POUR COMMENCER')}`,
-      attachment: await global.utils.getStreamFromURL("https://i.ibb.co/1Gdycvds/image.jpg")
+        `💥 ${bold('BLACK FLASH')} : Chance de déchaînement\n` +
+        `👥 ${bold('58 PERSONNAGES')} disponibles\n\n` +
+        `📌 ${bold('ENVOYEZ "start" POUR COMMENCER')}`
     });
   },
 
@@ -377,7 +717,7 @@ module.exports = {
 
     if (body === 'fin') {
       delete gameState[threadID];
-      return message.reply("🔄 ${bold('PARTIE TERMINÉE')}\n💡 Envoyez 'start' pour un nouveau combat.");
+      return message.reply(`🔄 ${bold('PARTIE TERMINÉE')}\n💡 Envoyez 'start' pour un nouveau combat.`);
     }
 
     if (state.step === "waiting_start" && body === "start") {
@@ -399,7 +739,7 @@ module.exports = {
       state.players.p2 = userID;
       state.step = "choose_characters_p1";
       
-      let characterList = `🎭 ${bold('LISTE DES PERSONNAGES')}\n━━━━━━━━━━━━━━━━━━━━\n`;
+      let characterList = `🎭 ${bold('LISTE DES 58 PERSONNAGES')}\n━━━━━━━━━━━━━━━━━━━━\n`;
       characterList += characters.map((char, i) => 
         `${i + 1}. ${char.name} (${char.power}★) - ${char.type}`
       ).join("\n");
@@ -418,7 +758,7 @@ module.exports = {
       const index = parseInt(body) - 1;
       
       if (isNaN(index) || index < 0 || index >= characters.length) {
-        return message.reply(`❌ ${bold('NUMÉRO INVALIDE')}\n📌 Réessayez avec un numéro valide`);
+        return message.reply(`❌ ${bold('NUMÉRO INVALIDE')}\n📌 Choisissez un numéro entre 1 et ${characters.length}`);
       }
 
       if (state.step === "choose_characters_p1" && userID === state.players.p1) {
@@ -472,7 +812,6 @@ module.exports = {
       const currentPlayer = state.turn === "p1" ? state.players.p1 : state.players.p2;
       if (userID !== currentPlayer) return;
 
-      // Anti-spam pour le chargement
       if (body === 'c' && state.lastAction === 'c' && state.lastPlayer === userID) {
         return message.reply(`❌ ${bold('IMPOSSIBLE')}\nVous ne pouvez pas charger deux fois de suite !`);
       }
@@ -491,7 +830,6 @@ module.exports = {
       let isBlackFlash = false;
       let isDomain = false;
 
-      // ─── VÉRIFICATION BLACK FLASH ───
       if (Math.random() < damageSystem.blackFlash.chance && state.blackFlashCharge > 2) {
         isBlackFlash = true;
         state.blackFlashCharge = 0;
@@ -619,7 +957,6 @@ module.exports = {
       state.lastAction = body;
       state.lastPlayer = userID;
 
-      // ─── RÉGÉNÉRATION ───
       if (state.turn === "p1") {
         state.p1Cursed = Math.min(100, state.p1Cursed + state.cursedRegen + (state.domainActive && state.domainUser === "p1" ? 10 : 0));
       } else {
