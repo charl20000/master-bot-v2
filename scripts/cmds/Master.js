@@ -176,7 +176,7 @@ async function repondre(api, event, message, input) {
 // ══════════════════════════════════════
 module.exports = {
   config: {
-    name: 'ai',
+    name: 'Master',
     aliases: ['ask', 'chat'],
     version: '20.0',
     author: 'Master Charbel',
